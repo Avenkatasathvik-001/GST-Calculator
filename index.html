@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GST Calculator — Quick & Free</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0f1117;
+      --paper:     #f7f6f2;
+      --accent:    #1a6bff;
+      --accent-lt: #e5eeff;
+      --green:     #00b86b;
+      --green-lt:  #d6f5e9;
+      --red:       #e8384f;
+      --muted:     #6b7280;
+      --border:    #e0ddd6;
+      --card:      #ffffff;
+      --radius:    14px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--ink);
+      color: #fff;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+    .logo span { color: var(--accent); }
+    .header-badge {
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 999px;
+      padding: 4px 12px;
+      color: #ccc;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--ink);
+      color: #fff;
+      padding: 40px 24px 56px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero p {
+      margin-top: 12px;
+      color: #aab0bb;
+      font-size: 1rem;
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: -28px auto 40px;
+      padding: 0 16px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 5px;
+      margin-bottom: 28px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 9px 12px;
+      border-radius: 7px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .tab.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    /* ── FORM GRID ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 540px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .field input, .field select {
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--ink);
+      background: var(--paper);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--accent);
+      background: #fff;
+    }
+    .field.full { grid-column: 1 / -1; }
+
+    /* ── GST RATE PILLS ── */
+    .rate-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .pill {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      background: transparent;
+      color: var(--ink);
+      transition: all 0.12s;
+    }
+    .pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── CALCULATE BTN ── */
+    .calc-btn {
+      margin-top: 24px;
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .calc-btn:hover { background: #0050cc; }
+    .calc-btn:active { transform: scale(0.98); }
+
+    /* ── RESULTS ── */
+    .results {
+      margin-top: 24px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeUp 0.25s ease;
+    }
+    .results.show { display: flex; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: var(--paper);
+      border: 1px solid var(--border);
+    }
+    .result-row .rlabel {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .result-row .rval {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .result-row.highlight {
+      background: var(--accent-lt);
+      border-color: var(--accent);
+    }
+    .result-row.highlight .rlabel { color: var(--accent); font-weight: 600; }
+    .result-row.highlight .rval   { color: var(--accent); font-size: 1.3rem; }
+
+    .gst-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .split-box {
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--paper);
+      text-align: center;
+    }
+    .split-box .sb-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .split-box .sb-val   { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; margin-top: 4px; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    /* ── COPY ROW ── */
+    .copy-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .copy-btn {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 7px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--ink);
+      transition: all 0.12s;
+    }
+    .copy-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+    /* ── HISTORY ── */
+    .history-section { margin-top: 24px; }
+    .history-section h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item {
+      padding: 11px 16px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--paper);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+    }
+    .history-item .hi-desc { color: var(--muted); }
+    .history-item .hi-val  { font-weight: 700; }
+    .no-history { font-size: 0.85rem; color: var(--muted); font-style: italic; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink);
+      color: #aab0bb;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .footer-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .footer-email { font-size: 0.85rem; margin-top: 3px; }
+    .footer-email a { color: var(--accent); text-decoration: none; }
+
+    .dh-btn {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 11px 24px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: background 0.15s;
+    }
+    .dh-btn:hover { background: #0050cc; }
+
+    .footer-divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin: 20px auto;
+      max-width: 260px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">GST<span>.</span>calc</div>
+  <div class="header-badge">India • Free • No login</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Calculate GST <em>instantly</em></h1>
+  <p>Add or remove GST, split CGST & SGST — no spreadsheets, no guesswork.</p>
+</div>
+
+<!-- MAIN -->
+<main>
+  <div class="card">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="setMode('add')" id="tab-add">Add GST to amount</button>
+      <button class="tab" onclick="setMode('remove')" id="tab-remove">Remove GST from amount</button>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-grid">
+      <div class="field">
+        <label>Amount (₹)</label>
+        <input type="number" id="amount" placeholder="e.g. 10000" min="0" step="0.01" oninput="onInputChange()" />
+      </div>
+      <div class="field">
+        <label>GST Rate</label>
+        <div class="rate-pills">
+          <button class="pill" onclick="setRate(0)"   id="r0">0%</button>
+          <button class="pill" onclick="setRate(5)"   id="r5">5%</button>
+          <button class="pill active" onclick="setRate(12)"  id="r12">12%</button>
+          <button class="pill" onclick="setRate(18)"  id="r18">18%</button>
+          <button class="pill" onclick="setRate(28)"  id="r28">28%</button>
+          <button class="pill" onclick="setRate('custom')">Custom</button>
+        </div>
+      </div>
+      <div class="field" id="custom-rate-field" style="display:none;">
+        <label>Custom Rate (%)</label>
+        <input type="number" id="custom-rate" placeholder="e.g. 3" min="0" max="100" step="0.01" oninput="onInputChange()" />
+      </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate GST →</button>
+
+    <!-- RESULTS -->
+    <div class="results" id="results">
+      <div id="row-original" class="result-row">
+        <span class="rlabel" id="label-original">Original Amount</span>
+        <span class="rval" id="val-original">—</span>
+      </div>
+      <div class="gst-split">
+        <div class="split-box">
+          <div class="sb-label">CGST (<span id="cgst-rate-label">—</span>%)</div>
+          <div class="sb-val" id="val-cgst">—</div>
+        </div>
+        <div class="split-box">
+          <div class="sb-label">SGST (<span id="sgst-rate-label">—</span>%)</div>
+          <div class="sb-val" id="val-sgst">—</div>
+        </div>
+      </div>
+      <div class="result-row">
+        <span class="rlabel">Total GST</span>
+        <span class="rval" id="val-gst">—</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="rlabel" id="label-total">Total Amount (with GST)</span>
+        <span class="rval" id="val-total">—</span>
+      </div>
+      <hr class="divider" />
+      <div class="copy-row">
+        <button class="copy-btn" onclick="copyResults()">Copy summary</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section" id="history-section" style="display:none;">
+    <div class="card" style="margin-top:16px;">
+      <h3>Recent calculations</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-name">A VENKATASATHVIK</div>
+  <div class="footer-email"><a href="mailto:avenkatasathvik@gmail.com">avenkatasathvik@gmail.com</a></div>
+  <hr class="footer-divider" />
+  <a class="dh-btn" href="https://digitalheroesco.com" target="_blank" rel="noopener">Built for Digital Heroes</a>
+</footer>
+
+<script>
+  let mode = 'add';       // 'add' | 'remove'
+  let rate = 12;          // numeric GST rate
+  let useCustom = false;
+  const history = [];
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('tab-add').classList.toggle('active', m === 'add');
+    document.getElementById('tab-remove').classList.toggle('active', m === 'remove');
+    clearResults();
+  }
+
+  function setRate(r) {
+    useCustom = r === 'custom';
+    document.getElementById('custom-rate-field').style.display = useCustom ? 'block' : 'none';
+    if (!useCustom) {
+      rate = r;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      document.getElementById('r' + r)?.classList.add('active');
+    } else {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      onInputChange();
+    }
+  }
+
+  function onInputChange() {
+    if (useCustom) {
+      const cv = parseFloat(document.getElementById('custom-rate').value);
+      if (!isNaN(cv)) rate = cv;
+    }
+  }
+
+  function fmt(n) {
+    return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function calculate() {
+    const amtRaw = parseFloat(document.getElementById('amount').value);
+    if (isNaN(amtRaw) || amtRaw < 0) {
+      alert('Please enter a valid amount.');
+      return;
+    }
+    if (useCustom) {
+      const cv = parseFloat(document.getElementById('custom-rate').value);
+      if (isNaN(cv) || cv < 0 || cv > 100) {
+        alert('Please enter a valid custom GST rate (0–100).');
+        return;
+      }
+      rate = cv;
+    }
+
+    let base, gstAmt, total;
+    if (mode === 'add') {
+      base    = amtRaw;
+      gstAmt  = +(base * rate / 100).toFixed(2);
+      total   = +(base + gstAmt).toFixed(2);
+    } else {
+      total   = amtRaw;
+      base    = +(total / (1 + rate / 100)).toFixed(2);
+      gstAmt  = +(total - base).toFixed(2);
+    }
+
+    const halfRate = (rate / 2).toFixed(1).replace(/\.0$/, '');
+    const halfGst  = +(gstAmt / 2).toFixed(2);
+
+    // Populate
+    document.getElementById('label-original').textContent = mode === 'add' ? 'Base Amount (ex-GST)' : 'Total Amount (inc-GST)';
+    document.getElementById('label-total').textContent    = mode === 'add' ? 'Total Amount (inc-GST)' : 'Base Amount (ex-GST)';
+    document.getElementById('val-original').textContent  = fmt(mode === 'add' ? base : total);
+    document.getElementById('cgst-rate-label').textContent = halfRate;
+    document.getElementById('sgst-rate-label').textContent = halfRate;
+    document.getElementById('val-cgst').textContent  = fmt(halfGst);
+    document.getElementById('val-sgst').textContent  = fmt(halfGst);
+    document.getElementById('val-gst').textContent   = fmt(gstAmt);
+    document.getElementById('val-total').textContent = fmt(mode === 'add' ? total : base);
+
+    const res = document.getElementById('results');
+    res.classList.remove('show');
+    void res.offsetWidth;
+    res.classList.add('show');
+
+    // History
+    history.unshift({
+      label: `${fmt(amtRaw)} @ ${rate}% GST (${mode === 'add' ? '+' : '–'})`,
+      total: fmt(mode === 'add' ? total : base)
+    });
+    if (history.length > 5) history.pop();
+    renderHistory();
+  }
+
+  function clearResults() {
+    document.getElementById('results').classList.remove('show');
+  }
+
+  function renderHistory() {
+    const section = document.getElementById('history-section');
+    const list    = document.getElementById('history-list');
+    if (history.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    list.innerHTML = history.map(h => `
+      <div class="history-item">
+        <span class="hi-desc">${h.label}</span>
+        <span class="hi-val">${h.total}</span>
+      </div>`).join('');
+  }
+
+  function copyResults() {
+    const lines = [
+      'GST Calculation Summary',
+      '------------------------',
+      document.getElementById('label-original').textContent + ': ' + document.getElementById('val-original').textContent,
+      'CGST: ' + document.getElementById('val-cgst').textContent,
+      'SGST: ' + document.getElementById('val-sgst').textContent,
+      'Total GST: ' + document.getElementById('val-gst').textContent,
+      document.getElementById('label-total').textContent + ': ' + document.getElementById('val-total').textContent,
+    ].join('\n');
+    navigator.clipboard.writeText(lines).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied ✓';
+      setTimeout(() => btn.textContent = 'Copy summary', 2000);
+    });
+  }
+
+  // Allow Enter key
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+</script>
+</body>
+</html>
